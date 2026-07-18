@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Public observability stack for MT5 FX telemetry, analytics dashboards, and backtest artifacts."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "alembic>=1.13",
+    "psycopg[binary]>=3.1",
+]
 
 [tool.uv]
 package = false
