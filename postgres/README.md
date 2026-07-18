@@ -2,7 +2,7 @@
 
 Postgres schema changes are managed with Alembic, but the schema source of truth is hand-written SQL. Alembic provides migration ordering, revision history, and the `alembic_version` table.
 
-The initial baseline revision contains no schema changes. The first table-creating revisions will define the live trading and backtest schemas.
+The initial baseline revision contains no schema changes. The first table-creating revisions define the live trading and backtest schemas.
 
 ## Configuration
 
@@ -44,9 +44,14 @@ depends_on = None
 
 def upgrade() -> None:
     sql = Path(__file__).parents[1] / "001_live_trading.sql"
-    op.execute(sql.read_text())
+    op.execute(sql.read_text().rstrip().removesuffix(";"))
 
 
 def downgrade() -> None:
     op.execute("DROP TABLE IF EXISTS bot_heartbeats CASCADE")
 ```
+
+## Migration Inventory
+
+- `20260718_000`: baseline revision with no schema changes.
+- `20260718_001`: live trading observability tables.
