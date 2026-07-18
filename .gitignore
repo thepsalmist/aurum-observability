@@ -1,0 +1,41 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+
+# Runtime data and generated artifacts
+runs/
+artifacts/
+backtests/
+exports/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo

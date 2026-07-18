@@ -1,0 +1,10 @@
+[project]
+name = "aurum-observability"
+version = "0.1.0"
+description = "Public observability stack for MT5 FX telemetry, analytics dashboards, and backtest artifacts."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
