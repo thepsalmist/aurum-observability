@@ -21,7 +21,7 @@ This repository owns the public infrastructure and dashboard contract. The priva
 
 ## Project Layout
 
-The repository starts with the shared project metadata and documentation. Service-specific directories are added by the implementation issues that introduce real files for Postgres, Grafana, SeaweedFS, the artifact gateway, scripts, and deployment docs.
+The repository starts with shared project metadata and documentation. Service-specific directories are added as the Postgres, Grafana, SeaweedFS, artifact gateway, scripts, and deployment components land.
 
 ## Development
 
@@ -37,8 +37,11 @@ Copy the example environment for local development:
 cp .env.example .env
 ```
 
+Run database migrations with Alembic:
+
+```bash
+uv run alembic -c postgres/alembic.ini upgrade head
+```
+
 Do not commit `.env` or any generated runtime artifacts.
 
-## Implementation Status
-
-This repository is being bootstrapped through GitHub issues before implementation PRs. Start with the foundation issues before adding dashboards or production deployment flows.
