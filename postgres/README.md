@@ -55,3 +55,4 @@ def downgrade() -> None:
 
 - `20260718_000`: baseline revision with no schema changes.
 - `20260718_001`: live trading observability tables.
+- `20260721_002`: backtest analytics tables.
