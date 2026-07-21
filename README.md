@@ -45,3 +45,30 @@ uv run alembic -c postgres/alembic.ini upgrade head
 
 Do not commit `.env` or any generated runtime artifacts.
 
+## Local Compose Stack
+
+The Compose stack is for local development only. It is not the production deployment path.
+
+Start Postgres, run migrations, start SeaweedFS S3, and start Grafana:
+
+```bash
+docker compose -f compose.dev.yaml --env-file .env up
+```
+
+Grafana is available at `http://localhost:3000` by default. The provisioned Postgres datasource uses the local Compose database and the `aurum-postgres` datasource UID.
+
+Live trading dashboard direction:
+
+![Live Trading Overview dashboard screenshot](docs/assets/live-trading-overview.png)
+
+Run migrations as a one-shot service without starting Grafana:
+
+```bash
+docker compose -f compose.dev.yaml --env-file .env run --rm migrate
+```
+
+Stop the local stack:
+
+```bash
+docker compose -f compose.dev.yaml --env-file .env down
+```
