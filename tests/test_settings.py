@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from gateway.settings import Settings, get_settings
+from gateway.validation import DEFAULT_ALLOWED_FILENAMES
 
 
 def test_settings_read_from_environment() -> None:
@@ -81,6 +82,53 @@ def test_missing_token_is_allowed_when_auth_is_disabled(
 
     assert settings.auth_required is False
     assert settings.auth_token is None
+
+
+def test_allowed_filenames_default_is_used() -> None:
+    assert Settings().allowed_filenames == DEFAULT_ALLOWED_FILENAMES
+
+
+def test_allowed_filenames_parse_from_a_comma_separated_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "ARTIFACT_GATEWAY_ALLOWED_FILENAMES",
+        " report.html , custom.json ,, trades.csv ",
+    )
+
+    assert Settings().allowed_filenames == frozenset(
+        {"report.html", "custom.json", "trades.csv"}
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "../../etc/passwd",
+        "report.html,../escape.json",
+        "nested/report.html",
+        "/absolute.json",
+        ".hidden",
+        "..",
+    ],
+)
+def test_unsafe_allowlist_entries_are_rejected(
+    monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    monkeypatch.setenv("ARTIFACT_GATEWAY_ALLOWED_FILENAMES", value)
+
+    with pytest.raises(ValidationError, match="ARTIFACT_GATEWAY_ALLOWED_FILENAMES"):
+        Settings()
+
+
+@pytest.mark.parametrize("value", ["", "  ", ",", " , "])
+def test_empty_allowlist_is_rejected(
+    monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    monkeypatch.setenv("ARTIFACT_GATEWAY_ALLOWED_FILENAMES", value)
+
+    with pytest.raises(ValidationError, match="ARTIFACT_GATEWAY_ALLOWED_FILENAMES"):
+        Settings()
 
 
 def test_secrets_are_not_exposed_by_repr() -> None:
