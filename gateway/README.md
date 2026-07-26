@@ -53,8 +53,27 @@ Check that the service is up:
 curl http://localhost:8000/healthz
 ```
 
+## Authentication
+
+Artifact requests require a bearer token, supplied as `Authorization: Bearer <token>` and checked
+against `ARTIFACT_GATEWAY_AUTH_TOKEN`. Requests with a missing, malformed, or incorrect token get
+`401` with a `WWW-Authenticate: Bearer` header. The comparison is constant-time, and the expected
+token is never echoed in a response. Callers send:
+
+```
+Authorization: Bearer <token>
+```
+
+Authentication is on by default. Setting `ARTIFACT_GATEWAY_AUTH_REQUIRED=false` disables it, which
+is intended only for local development against throwaway data.
+
+When authentication is required, a non-blank `ARTIFACT_GATEWAY_AUTH_TOKEN` must be configured. The
+service refuses to start otherwise, so it cannot come up unprotected by accident.
+
+`/healthz` is deliberately unauthenticated so liveness probes work without credentials.
+
 ## Endpoints
 
-| Method | Path | Description |
-| --- | --- | --- |
-| `GET` | `/healthz` | Liveness probe; returns `{"status": "ok"}` |
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| `GET` | `/healthz` | no | Liveness probe; returns `{"status": "ok"}` |

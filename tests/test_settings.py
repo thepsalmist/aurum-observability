@@ -52,6 +52,37 @@ def test_missing_required_setting_is_rejected(
         Settings()
 
 
+@pytest.mark.parametrize("token", ["", "   "])
+def test_blank_token_is_rejected_when_auth_is_required(
+    monkeypatch: pytest.MonkeyPatch, token: str
+) -> None:
+    monkeypatch.setenv("ARTIFACT_GATEWAY_AUTH_TOKEN", token)
+
+    with pytest.raises(ValidationError, match="ARTIFACT_GATEWAY_AUTH_TOKEN"):
+        Settings()
+
+
+def test_missing_token_is_rejected_when_auth_is_required(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("ARTIFACT_GATEWAY_AUTH_TOKEN")
+
+    with pytest.raises(ValidationError, match="ARTIFACT_GATEWAY_AUTH_TOKEN"):
+        Settings()
+
+
+def test_missing_token_is_allowed_when_auth_is_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("ARTIFACT_GATEWAY_AUTH_TOKEN")
+    monkeypatch.setenv("ARTIFACT_GATEWAY_AUTH_REQUIRED", "false")
+
+    settings = Settings()
+
+    assert settings.auth_required is False
+    assert settings.auth_token is None
+
+
 def test_secrets_are_not_exposed_by_repr() -> None:
     rendered = repr(Settings())
 

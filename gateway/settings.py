@@ -1,6 +1,7 @@
 from functools import lru_cache
+from typing import Self
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +24,17 @@ class Settings(BaseSettings):
     auth_token: SecretStr | None = Field(
         default=None, alias="ARTIFACT_GATEWAY_AUTH_TOKEN"
     )
+
+    @model_validator(mode="after")
+    def _check_auth_token_present(self) -> Self:
+        if self.auth_required and not (
+            self.auth_token and self.auth_token.get_secret_value().strip()
+        ):
+            raise ValueError(
+                "ARTIFACT_GATEWAY_AUTH_TOKEN must be a non-blank value when "
+                "ARTIFACT_GATEWAY_AUTH_REQUIRED is true"
+            )
+        return self
 
 
 @lru_cache
