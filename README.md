@@ -72,3 +72,21 @@ Stop the local stack:
 ```bash
 docker compose -f compose.dev.yaml --env-file .env down
 ```
+
+## Artifact Gateway
+
+The FastAPI artifact gateway serves backtest artifacts from private SeaweedFS/S3 storage. It is
+started by `scripts/start-gateway.sh` and listens on port 8000 by default.
+
+```bash
+docker compose -f compose.dev.yaml --env-file .env up gateway
+curl http://localhost:8000/healthz
+```
+
+See `gateway/README.md` for configuration and endpoints.
+
+## Tests
+
+```bash
+uv run pytest
+```

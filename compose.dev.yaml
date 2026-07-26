@@ -45,6 +45,28 @@ services:
       - seaweedfs-data:/data
       - ./scripts:/scripts:ro
 
+  gateway:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    working_dir: /workspace
+    environment:
+      SEAWEEDFS_S3_ENDPOINT_URL: http://seaweedfs:8333
+      SEAWEEDFS_S3_ACCESS_KEY: ${SEAWEEDFS_S3_ACCESS_KEY:-mt5fx-publisher}
+      SEAWEEDFS_S3_SECRET_KEY: ${SEAWEEDFS_S3_SECRET_KEY:-change-me}
+      SEAWEEDFS_BUCKET: ${SEAWEEDFS_BUCKET:-mt5-backtests}
+      SEAWEEDFS_S3_REGION: ${SEAWEEDFS_S3_REGION:-us-east-1}
+      ARTIFACT_GATEWAY_AUTH_REQUIRED: ${ARTIFACT_GATEWAY_AUTH_REQUIRED:-true}
+      ARTIFACT_GATEWAY_AUTH_TOKEN: ${ARTIFACT_GATEWAY_AUTH_TOKEN:-change-me}
+      UV_PROJECT_ENVIRONMENT: /tmp/aurum-venv
+      UV_CACHE_DIR: /tmp/uv-cache
+      UV_FROZEN: "true"
+    command: ["scripts/start-gateway.sh"]
+    ports:
+      - "${ARTIFACT_GATEWAY_HOST_PORT:-8000}:8000"
+    depends_on:
+      - seaweedfs
+    volumes:
+      - .:/workspace:ro
+
   grafana:
     image: grafana/grafana-oss:11.1.0
     environment:
