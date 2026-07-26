@@ -1,8 +1,10 @@
 from functools import lru_cache
-from typing import Self
+from typing import Annotated, Self
 
-from pydantic import Field, SecretStr, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, SecretStr, field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+from gateway.validation import DEFAULT_ALLOWED_FILENAMES, is_safe_name
 
 
 class Settings(BaseSettings):
@@ -24,6 +26,31 @@ class Settings(BaseSettings):
     auth_token: SecretStr | None = Field(
         default=None, alias="ARTIFACT_GATEWAY_AUTH_TOKEN"
     )
+
+    allowed_filenames: Annotated[frozenset[str], NoDecode] = Field(
+        default=DEFAULT_ALLOWED_FILENAMES,
+        alias="ARTIFACT_GATEWAY_ALLOWED_FILENAMES",
+    )
+
+    @field_validator("allowed_filenames", mode="before")
+    @classmethod
+    def _split_allowed_filenames(cls, value: object) -> object:
+        if isinstance(value, str):
+            return frozenset(part.strip() for part in value.split(",") if part.strip())
+        return value
+
+    @field_validator("allowed_filenames", mode="after")
+    @classmethod
+    def _check_allowed_filenames(cls, value: frozenset[str]) -> frozenset[str]:
+        if not value:
+            raise ValueError("ARTIFACT_GATEWAY_ALLOWED_FILENAMES must not be empty")
+        unsafe = sorted(name for name in value if not is_safe_name(name))
+        if unsafe:
+            raise ValueError(
+                "ARTIFACT_GATEWAY_ALLOWED_FILENAMES contains unsafe entries: "
+                f"{', '.join(unsafe)}"
+            )
+        return value
 
     @model_validator(mode="after")
     def _check_auth_token_present(self) -> Self:

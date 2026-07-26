@@ -17,6 +17,7 @@ All settings are read from the environment. There are no hardcoded defaults for 
 | `SEAWEEDFS_S3_REGION` | no | `us-east-1` | S3 region |
 | `ARTIFACT_GATEWAY_AUTH_REQUIRED` | no | `true` | Whether requests must present a token |
 | `ARTIFACT_GATEWAY_AUTH_TOKEN` | no | — | Token accepted by the gateway |
+| `ARTIFACT_GATEWAY_ALLOWED_FILENAMES` | no | see below | Comma-separated artifact filenames the gateway may serve |
 
 Configuration is validated at application startup, so a misconfigured gateway fails fast
 instead of serving traffic.
@@ -71,6 +72,31 @@ When authentication is required, a non-blank `ARTIFACT_GATEWAY_AUTH_TOKEN` must 
 service refuses to start otherwise, so it cannot come up unprotected by accident.
 
 `/healthz` is deliberately unauthenticated so liveness probes work without credentials.
+
+## Request Validation
+
+Run IDs and filenames are validated before any storage access, so a rejected request never reaches
+the object store.
+
+A run ID must be a single path segment: it starts with a letter or digit, contains only letters,
+digits, `.`, `-`, and `_`, never contains `..`, and is at most 128 characters. Anything else is
+rejected with `400`.
+
+Filenames are not pattern-matched, they are checked for exact membership in
+`ARTIFACT_GATEWAY_ALLOWED_FILENAMES`. Traversal through the filename is therefore impossible by
+construction. The default allowlist is:
+
+```
+report.html, summary.json, metrics.json, trades.csv, equity_curve.png, drawdown.png
+```
+
+Allowlist entries are themselves validated at startup with the same single-segment rule, so a
+misconfigured entry such as `../escape.json` stops the service from starting rather than widening
+what it will serve. The list must not be empty.
+
+Status codes are split so they stay meaningful: `400` means the request itself was invalid, and
+`404` means the request was well-formed but no such object exists. Error messages are fixed
+strings and never echo the submitted value.
 
 ## Endpoints
 

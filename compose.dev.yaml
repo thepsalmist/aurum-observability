@@ -56,6 +56,7 @@ services:
       SEAWEEDFS_S3_REGION: ${SEAWEEDFS_S3_REGION:-us-east-1}
       ARTIFACT_GATEWAY_AUTH_REQUIRED: ${ARTIFACT_GATEWAY_AUTH_REQUIRED:-true}
       ARTIFACT_GATEWAY_AUTH_TOKEN: ${ARTIFACT_GATEWAY_AUTH_TOKEN:-change-me}
+      ARTIFACT_GATEWAY_ALLOWED_FILENAMES: ${ARTIFACT_GATEWAY_ALLOWED_FILENAMES:-report.html,summary.json,metrics.json,trades.csv,equity_curve.png,drawdown.png}
       UV_PROJECT_ENVIRONMENT: /tmp/aurum-venv
       UV_CACHE_DIR: /tmp/uv-cache
       UV_FROZEN: "true"
