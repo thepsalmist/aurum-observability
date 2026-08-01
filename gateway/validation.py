@@ -1,6 +1,7 @@
 import re
 from collections.abc import Collection
 
+PROFILE_MAX_LENGTH = 128
 RUN_ID_MAX_LENGTH = 128
 
 # Deliberately excludes "/" and any path separator, so a validated name is always a
@@ -20,12 +21,20 @@ DEFAULT_ALLOWED_FILENAMES = frozenset(
 
 
 class InvalidArtifactRequest(ValueError):
-    """Raised when a requested run ID or filename fails validation."""
+    """Raised when a requested profile, run ID, or filename fails validation."""
 
 
 def is_safe_name(value: str) -> bool:
     """Whether a value is a single, traversal-free path segment."""
     return ".." not in value and SAFE_NAME_PATTERN.fullmatch(value) is not None
+
+
+def validate_profile(profile: str) -> str:
+    if len(profile) > PROFILE_MAX_LENGTH:
+        raise InvalidArtifactRequest("Profile is too long.")
+    if not is_safe_name(profile):
+        raise InvalidArtifactRequest("Profile is not a valid artifact profile name.")
+    return profile
 
 
 def validate_run_id(run_id: str) -> str:
