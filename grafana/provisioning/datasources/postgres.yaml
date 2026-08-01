@@ -5,13 +5,13 @@ datasources:
     uid: aurum-postgres
     type: postgres
     access: proxy
-    url: postgres:5432
+    url: ${POSTGRES_HOST}:${POSTGRES_PORT}
     database: ${POSTGRES_DB}
     user: ${POSTGRES_USER}
     secureJsonData:
       password: ${POSTGRES_PASSWORD}
     jsonData:
-      sslmode: disable
+      sslmode: ${POSTGRES_SSLMODE}
       postgresVersion: 1600
       timescaledb: false
     editable: false
