@@ -1,0 +1,1238 @@
+{
+  "uid": "aurum-backtest-research",
+  "id": null,
+  "title": "Backtest Research Overview",
+  "tags": [
+    "aurum",
+    "backtest"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "strategy",
+        "label": "Strategy",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "aurum-postgres"
+        },
+        "query": "SELECT DISTINCT strategy_name FROM backtest_runs ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "current": {},
+        "options": [],
+        "hide": 0,
+        "includeAll": true,
+        "allValue": "%"
+      },
+      {
+        "name": "symbol",
+        "label": "Symbol",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "aurum-postgres"
+        },
+        "query": "SELECT DISTINCT symbol FROM backtest_runs WHERE strategy_name LIKE '$strategy' ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "current": {},
+        "options": [],
+        "hide": 0,
+        "includeAll": true,
+        "allValue": "%"
+      },
+      {
+        "name": "timeframe",
+        "label": "Timeframe",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "aurum-postgres"
+        },
+        "query": "SELECT DISTINCT timeframe FROM backtest_runs WHERE strategy_name LIKE '$strategy' AND symbol LIKE '$symbol' ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "current": {},
+        "options": [],
+        "hide": 0,
+        "includeAll": true,
+        "allValue": "%"
+      },
+      {
+        "name": "run_id",
+        "label": "Run",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "aurum-postgres"
+        },
+        "query": "SELECT run_id FROM backtest_runs WHERE strategy_name LIKE '$strategy' AND symbol LIKE '$symbol' AND timeframe LIKE '$timeframe' ORDER BY executed_at DESC",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "current": {},
+        "options": [],
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "artifact_base",
+        "label": "Artifact gateway",
+        "type": "textbox",
+        "query": "http://localhost:8000/artifacts",
+        "current": {
+          "text": "http://localhost:8000/artifacts",
+          "value": "http://localhost:8000/artifacts"
+        },
+        "options": [],
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Run Comparison",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Backtest Runs",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Net Profit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expectancy"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max DD %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Win %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT r.executed_at      AS \"Executed\",\n       r.run_id           AS \"Run\",\n       r.strategy_name    AS \"Strategy\",\n       r.variant_name     AS \"Variant\",\n       r.symbol           AS \"Symbol\",\n       r.timeframe        AS \"TF\",\n       r.period_start     AS \"From\",\n       r.period_end       AS \"To\",\n       r.status           AS \"Status\",\n       m.net_profit       AS \"Net Profit\",\n       m.max_drawdown_pct AS \"Max DD %\",\n       m.profit_factor    AS \"Profit Factor\",\n       m.expected_payoff  AS \"Expectancy\",\n       m.win_rate_pct     AS \"Win %\",\n       m.total_trades     AS \"Trades\"\nFROM backtest_runs r\nLEFT JOIN backtest_summary_metrics m ON m.backtest_run_id = r.id\nWHERE r.strategy_name LIKE '$strategy'\n  AND r.symbol LIKE '$symbol'\n  AND r.timeframe LIKE '$timeframe'\nORDER BY r.executed_at DESC\nLIMIT 50"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "row",
+      "title": "Selected Run",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "panels": []
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Net Profit",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.net_profit AS \"Net Profit\"\nFROM backtest_summary_metrics m\nJOIN backtest_runs r ON r.id = m.backtest_run_id\nWHERE r.run_id = '$run_id'"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Max Drawdown",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.max_drawdown_pct AS \"Max Drawdown\"\nFROM backtest_summary_metrics m\nJOIN backtest_runs r ON r.id = m.backtest_run_id\nWHERE r.run_id = '$run_id'"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Expectancy",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.expected_payoff AS \"Expectancy\"\nFROM backtest_summary_metrics m\nJOIN backtest_runs r ON r.id = m.backtest_run_id\nWHERE r.run_id = '$run_id'"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Reward : Risk",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN m.average_loss IS NULL OR m.average_loss = 0 THEN NULL\n            ELSE m.average_win / abs(m.average_loss) END AS \"Reward : Risk\"\nFROM backtest_summary_metrics m\nJOIN backtest_runs r ON r.id = m.backtest_run_id\nWHERE r.run_id = '$run_id'"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "Win Rate",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.win_rate_pct AS \"Win Rate\"\nFROM backtest_summary_metrics m\nJOIN backtest_runs r ON r.id = m.backtest_run_id\nWHERE r.run_id = '$run_id'"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Trades",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.total_trades AS \"Trades\"\nFROM backtest_summary_metrics m\nJOIN backtest_runs r ON r.id = m.backtest_run_id\nWHERE r.run_id = '$run_id'"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Weekly",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "barchart",
+      "title": "Weekly Net Profit",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "Week",
+        "legend": {
+          "showLegend": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT to_char(w.week_start, 'YYYY-MM-DD') AS \"Week\",\n       w.net_profit                        AS \"Net Profit\"\nFROM backtest_weekly_metrics w\nJOIN backtest_runs r ON r.id = w.backtest_run_id\nWHERE r.run_id = '$run_id'\nORDER BY w.week_start"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Weekly Metrics",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Net Profit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Win %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max DD %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT w.week_start       AS \"Week\",\n       w.total_trades     AS \"Trades\",\n       w.winning_trades   AS \"Wins\",\n       w.losing_trades    AS \"Losses\",\n       w.net_profit       AS \"Net Profit\",\n       w.win_rate_pct     AS \"Win %\",\n       w.max_drawdown_pct AS \"Max DD %\"\nFROM backtest_weekly_metrics w\nJOIN backtest_runs r ON r.id = w.backtest_run_id\nWHERE r.run_id = '$run_id'\nORDER BY w.week_start"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "row",
+      "title": "Breakdowns",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "panels": []
+    },
+    {
+      "id": 14,
+      "type": "table",
+      "title": "Direction Breakdown",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 25
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Net Profit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Win %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT upper(d.direction) AS \"Dir\",\n       d.total_trades     AS \"Trades\",\n       d.winning_trades   AS \"Wins\",\n       d.losing_trades    AS \"Losses\",\n       d.net_profit       AS \"Net Profit\",\n       d.average_profit   AS \"Avg\",\n       d.win_rate_pct     AS \"Win %\"\nFROM backtest_direction_metrics d\nJOIN backtest_runs r ON r.id = d.backtest_run_id\nWHERE r.run_id = '$run_id'\nORDER BY d.direction"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "table",
+      "title": "Close Reasons",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 25
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Net Profit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Win %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT c.close_reason   AS \"Reason\",\n       c.total_trades   AS \"Trades\",\n       c.net_profit     AS \"Net Profit\",\n       c.average_profit AS \"Avg\",\n       c.win_rate_pct   AS \"Win %\"\nFROM backtest_close_reason_metrics c\nJOIN backtest_runs r ON r.id = c.backtest_run_id\nWHERE r.run_id = '$run_id'\nORDER BY c.total_trades DESC"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "table",
+      "title": "Blocked Entries",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 25
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT b.block_reason    AS \"Reason\",\n       b.blocked_entries AS \"Blocked\",\n       b.first_blocked_at AS \"First\",\n       b.last_blocked_at  AS \"Last\"\nFROM backtest_blocked_entry_metrics b\nJOIN backtest_runs r ON r.id = b.backtest_run_id\nWHERE r.run_id = '$run_id'\nORDER BY b.blocked_entries DESC"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "row",
+      "title": "Artifacts",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "panels": []
+    },
+    {
+      "id": 18,
+      "type": "table",
+      "title": "Artifacts",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "aurum-postgres"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Size"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Open"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open via artifact gateway",
+                    "url": "${__value.text}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "aurum-postgres"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT a.artifact_type                  AS \"Artifact\",\n       a.content_type                   AS \"Content Type\",\n       a.byte_size                      AS \"Size\",\n       '$artifact_base/' || a.object_key AS \"Open\"\nFROM backtest_artifacts a\nJOIN backtest_runs r ON r.id = a.backtest_run_id\nWHERE r.run_id = '$run_id'\nORDER BY a.artifact_type"
+        }
+      ]
+    }
+  ]
+}
