@@ -1,0 +1,97 @@
+name: aurum-observability-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mt5fx}
+      POSTGRES_USER: ${POSTGRES_USER:-mt5fx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - postgres-prod-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-mt5fx}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-mt5fx}
+    command: ["scripts/run-migrations.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  seaweedfs:
+    build:
+      context: .
+      dockerfile: seaweedfs/Dockerfile
+    environment:
+      SEAWEEDFS_HOST: seaweedfs
+      SEAWEEDFS_S3_ACCESS_KEY: ${SEAWEEDFS_S3_ACCESS_KEY:-mt5fx-publisher}
+      SEAWEEDFS_S3_SECRET_KEY: ${SEAWEEDFS_S3_SECRET_KEY:-change-me}
+    volumes:
+      - seaweedfs-prod-data:/data
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8000
+      SEAWEEDFS_S3_ENDPOINT_URL: http://seaweedfs:8333
+      SEAWEEDFS_S3_ACCESS_KEY: ${SEAWEEDFS_S3_ACCESS_KEY:-mt5fx-publisher}
+      SEAWEEDFS_S3_SECRET_KEY: ${SEAWEEDFS_S3_SECRET_KEY:-change-me}
+      SEAWEEDFS_BUCKET: ${SEAWEEDFS_BUCKET:-mt5-backtests}
+      SEAWEEDFS_S3_REGION: ${SEAWEEDFS_S3_REGION:-us-east-1}
+      ARTIFACT_GATEWAY_AUTH_REQUIRED: ${ARTIFACT_GATEWAY_AUTH_REQUIRED:-true}
+      ARTIFACT_GATEWAY_AUTH_TOKEN: ${ARTIFACT_GATEWAY_AUTH_TOKEN:-change-me}
+      ARTIFACT_GATEWAY_ALLOWED_FILENAMES: ${ARTIFACT_GATEWAY_ALLOWED_FILENAMES:-report.html,summary.json,metrics.json,trades.csv,equity_curve.png,drawdown.png}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    ports:
+      - "${ARTIFACT_GATEWAY_HOST_PORT:-8000}:8000"
+    depends_on:
+      - seaweedfs
+
+  grafana:
+    build:
+      context: .
+      dockerfile: grafana/Dockerfile
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: postgres:5432
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_USER: ${POSTGRES_USER:-mt5fx}
+      GF_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      GF_DATABASE_SSL_MODE: ${POSTGRES_SSLMODE:-disable}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-mt5fx}
+      POSTGRES_USER: ${POSTGRES_USER:-mt5fx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_SSLMODE: ${POSTGRES_SSLMODE:-disable}
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-prod-data:
+  seaweedfs-prod-data:

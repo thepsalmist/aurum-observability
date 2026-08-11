@@ -1,0 +1,21 @@
+{
+  "name": "aurum-gateway",
+  "description": "Artifact gateway serving backtest artifacts from private object storage.",
+  "scripts": {
+    "dokku": {
+      "predeploy": "scripts/run-migrations.sh"
+    }
+  },
+  "healthchecks": {
+    "web": [
+      {
+        "type": "startup",
+        "name": "gateway healthz",
+        "path": "/healthz",
+        "port": 8000,
+        "attempts": 6,
+        "wait": 5
+      }
+    ]
+  }
+}
