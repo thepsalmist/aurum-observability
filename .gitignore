@@ -33,9 +33,11 @@ exports/
 *.sqlite3
 *.db
 
-# Local editor and OS files
+# Local editor, agent and OS files
 .DS_Store
 .idea/
 .vscode/
+.claude/
+.omc/
 *.swp
 *.swo
