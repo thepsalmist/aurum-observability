@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v9
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - run: uvx ruff@${{ env.RUFF_VERSION }} format --check .
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v9
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - run: uv sync
@@ -60,7 +60,7 @@ jobs:
       DATABASE_URL: postgresql+psycopg://mt5fx:disposable-ci-password@localhost:5432/mt5fx
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v9
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - name: Apply migrations the way a deploy does
