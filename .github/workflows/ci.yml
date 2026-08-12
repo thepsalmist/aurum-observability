@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_FROZEN: "1"
+  RUFF_VERSION: "0.15.12"
+
+jobs:
+  lint:
+    name: Format and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+      - run: uvx ruff@${{ env.RUFF_VERSION }} format --check .
+      - run: uvx ruff@${{ env.RUFF_VERSION }} check .
+
+  test:
+    name: Gateway tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run pytest -q
+
+  migrations:
+    name: Migrations apply
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: mt5fx
+          POSTGRES_USER: mt5fx
+          POSTGRES_PASSWORD: disposable-ci-password
+        options: >-
+          --health-cmd "pg_isready -U mt5fx -d mt5fx"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql+psycopg://mt5fx:disposable-ci-password@localhost:5432/mt5fx
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+      - name: Apply migrations the way a deploy does
+        run: scripts/run-migrations.sh
+      - name: Verify the database reached head
+        run: |
+          current="$(uv run --no-dev alembic -c postgres/alembic.ini current)"
+          echo "$current"
+          case "$current" in
+            *"(head)"*) ;;
+            *) echo "::error::Alembic did not reach head after upgrade"; exit 1 ;;
+          esac
